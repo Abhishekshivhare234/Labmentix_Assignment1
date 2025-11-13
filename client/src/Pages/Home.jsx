@@ -1,12 +1,13 @@
 import React from "react";
 import CourseSlider from "./CourseSlider";
+import FetchCourses from "../components/FetchCourses";
 import Footer from "./Footer";
 import Contact from "./Contact";
+import { AuthContext } from "../components/Layout";
 
 const Home = () => {
   return (
 <>
-
     <div className="flex flex-col md:flex-row justify-between items-center flex-grow bg-gray-50 px-6 md:px-20 py-16">
       <div className="text-center md:text-left max-w-xl">
         <h2 className="text-4xl md:text-5xl font-extrabold text-blue-700 leading-tight">
@@ -41,8 +42,11 @@ const Home = () => {
 
       <h3 className="text-2xl font-bold text-blue-700">Our Popular Courses</h3>
       <CourseSlider />
-        <Contact
-        />
+      <div className="mt-6">
+        {/* Course list */}
+        <FetchCourses />
+      </div>
+      <Contact />
 </>
   );
 };
