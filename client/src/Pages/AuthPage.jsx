@@ -1,15 +1,53 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import api from "../lib/api";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../components/Layout";
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [role, setRole] = useState("student");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { setUser } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isLogin) {
-      console.log("Login as:", role);
-    } else {
-      console.log("Register as:", role);
+
+    try {
+      if (isLogin) {
+        const res = await api.post('/auth/login', {
+          email,
+          password
+        });
+
+        console.log("Login success", res.data);
+        // update global auth state if available
+        // After successful auth, fetch canonical profile from backend and set it
+        try {
+          const profileRes = await api.post('/auth/profile');
+          if (profileRes?.data?.profile) setUser?.(profileRes.data.profile);
+        } catch {
+          // ignore
+        }
+        navigate('/');
+      } else {
+        const payload = { email, password, name, role };
+        const res = await api.post('/auth/signup', payload);
+
+        console.log("Registered as", role, res.data);
+        try {
+          const profileRes = await api.post('/auth/profile');
+          if (profileRes?.data?.profile) setUser?.(profileRes.data.profile);
+        } catch {
+          // ignore
+        }
+        navigate('/');
+      }
+
+    } catch (err) {
+      console.error("Auth error →", err.response?.data || err.message);
     }
   };
 
@@ -21,21 +59,19 @@ const AuthPage = () => {
         <div className="flex justify-around mb-6">
           <button
             onClick={() => setIsLogin(true)}
-            className={`px-6 py-2 font-semibold rounded-lg transition ${
-              isLogin
+            className={`px-6 py-2 font-semibold rounded-lg transition ${isLogin
                 ? "bg-blue-600 text-white"
                 : "bg-gray-200 text-gray-700 hover:bg-blue-100"
-            }`}
+              }`}
           >
             Login
           </button>
           <button
             onClick={() => setIsLogin(false)}
-            className={`px-6 py-2 font-semibold rounded-lg transition ${
-              !isLogin
+            className={`px-6 py-2 font-semibold rounded-lg transition ${!isLogin
                 ? "bg-blue-600 text-white"
                 : "bg-gray-200 text-gray-700 hover:bg-blue-100"
-            }`}
+              }`}
           >
             Register
           </button>
@@ -55,24 +91,22 @@ const AuthPage = () => {
             <button
               type="button"
               onClick={() => setRole("student")}
-              className={`px-4 py-2 rounded-lg font-semibold border ${
-                role === "student"
+              className={`px-4 py-2 rounded-lg font-semibold border ${role === "student"
                   ? "bg-blue-600 text-white border-blue-600"
                   : "bg-gray-100 text-gray-700 hover:bg-blue-50"
-              }`}
+                }`}
             >
               Student 👨‍🎓
             </button>
             <button
               type="button"
-              onClick={() => setRole("teacher")}
-              className={`px-4 py-2 rounded-lg font-semibold border ${
-                role === "teacher"
+              onClick={() => setRole("instructor")}
+              className={`px-4 py-2 rounded-lg font-semibold border ${role === "instructor"
                   ? "bg-blue-600 text-white border-blue-600"
                   : "bg-gray-100 text-gray-700 hover:bg-blue-50"
-              }`}
+                }`}
             >
-              Teacher 👩‍🏫
+              Instructor 👩‍🏫
             </button>
           </div>
         </div>
@@ -83,6 +117,8 @@ const AuthPage = () => {
             <div>
               <label className="block text-gray-600 mb-1">Full Name</label>
               <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 type="text"
                 placeholder="Enter your full name"
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
@@ -93,6 +129,8 @@ const AuthPage = () => {
           <div>
             <label className="block text-gray-600 mb-1">Email</label>
             <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               type="email"
               placeholder="Enter your email"
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
@@ -103,6 +141,8 @@ const AuthPage = () => {
           <div>
             <label className="block text-gray-600 mb-1">Password</label>
             <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               type="password"
               placeholder="Enter your password"
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
