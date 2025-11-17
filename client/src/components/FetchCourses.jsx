@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../lib/api";
 
 const FetchCourses = () => {
   const [courses, setCourses] = useState([]);
@@ -9,8 +9,9 @@ const FetchCourses = () => {
     // Fetch courses from backend
     const fetchCourses = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/courses"); // 🔹 Your backend API URL
-        setCourses(response.data);
+        const response = await api.get('/courses/get-courses'); // baseURL points to /api/v1
+        // backend returns { courses: [...] }
+        setCourses(response.data.courses || []);
       } catch (error) {
         console.error("Error fetching courses:", error);
       } finally {
@@ -37,11 +38,11 @@ const FetchCourses = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {courses.map((course) => (
             <div
-              key={course._id}
+              key={course.id}
               className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 p-6"
             >
               <img
-                src={course.image || "https://via.placeholder.com/400x200"}
+                src={course.thumbnail || "https://via.placeholder.com/400x200"}
                 alt={course.title}
                 className="w-full h-40 object-cover rounded-lg mb-4"
               />
@@ -51,7 +52,7 @@ const FetchCourses = () => {
               <p className="text-gray-600 mb-4">
                 {course.description?.substring(0, 80)}...
               </p>
-              <p className="font-bold text-blue-600">₹{course.price}</p>
+              <p className="font-bold text-blue-600">{course.price ? `₹${course.price}` : 'Free'}</p>
             </div>
           ))}
         </div>

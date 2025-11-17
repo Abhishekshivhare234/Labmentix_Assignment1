@@ -1,0 +1,5 @@
+File Uploads: Add course thumbnail and video uploads
+Course Content: Add lessons and modules to courses
+Progress Tracking: Implement actual progress calculation
+Payments: Integrate payment gateway for paid courses
+Notifications: Email notifications for enrollments
